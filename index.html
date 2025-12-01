@@ -85,11 +85,10 @@
     <div class="container" id="game-container">
         <h1>Englishes Bee</h1>
         
-        <div class="mode-selector">
-            <button class="mode-btn" onclick="setMode('world')">World</button>
-            <button class="mode-btn" onclick="setMode('eiken2')">英検2級</button>
-            <button class="mode-btn" onclick="setMode('hard')">難単語</button>
+        <div class="mode-selector" id="mode-container">
+            Loading levels...
         </div>
+
         <div id="accent-display" class="accent-display">Loading...</div>
         
         <button id="play-btn" onclick="speakWord()">🔊</button>
@@ -121,34 +120,81 @@
         ];
     
         async function loadDatabase() {
-            try {
-                const response = await fetch('words.json');
-                database = await response.json();
-                document.getElementById('accent-display').innerText = "Select Mode";
-                // ページ読み込み時にボタンの初期状態を作るため、とりあえず最初のモードをロード（再生はしない）
-                if(database["eiken2"]) setMode('eiken2'); 
-            } catch (error) {
-                console.error("Error:", error);
+        try {
+            const response = await fetch('words.json');
+            database = await response.json();
+            
+            // ★ここが新機能：データにあるキー（level_1など）の分だけボタンを作る
+            const container = document.getElementById('mode-container');
+            container.innerHTML = ''; // "Loading..." を消す
+            
+            // キーを「level_1, level_2...」の順に並べ替えたい場合の処理
+            const sortedKeys = Object.keys(database).sort((a, b) => {
+                // 数字部分を取り出して比較（level_1 vs level_10 対策）
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
+            sortedKeys.forEach((key, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'mode-btn';
+                // 表示名を作る（keyそのまま、あるいは整形）
+                // 例: "level_1" → "Lv.1"
+                const label = key.replace('level_', 'Lv.').toUpperCase();
+                btn.innerText = label;
+                btn.onclick = () => setMode(key);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('accent-display').innerText = "Select Level";
+            
+            // 最初は一番やさしいレベル(最初のキー)を選択状態にする
+            if (sortedKeys.length > 0) {
+                // 自動再生はオフ(false)でセット
+                setMode(sortedKeys[0]);
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById('mode-container').innerText = "Error loading data.";
+        }
+    }
+
+    // setMode関数も、動的に生成されたボタンに対応させる
+    function setMode(modeName) {
+        if (!database[modeName]) return;
+        currentMode = modeName;
+        currentList = [...database[modeName]];
+        sessionHistory = [];
+        
+        // 全ボタンのactiveを外す
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // 今回押されたボタンを探してactiveにする
+        // (動的生成されたボタンはonclick属性で探すのが難しいので、テキスト内容などで探すか、
+        //  もっと簡単に、クリックイベントの送信元(event.target)を使います)
+        if (event && event.target && event.target.classList.contains('mode-btn')) {
+            event.target.classList.add('active');
+        } else {
+            // 自動選択時などのフォールバック: テキストで探す
+            const label = modeName.replace('level_', 'Lv.').toUpperCase();
+            const btns = document.querySelectorAll('.mode-btn');
+            for (let btn of btns) {
+                if (btn.innerText === label) {
+                    btn.classList.add('active');
+                    break;
+                }
             }
         }
-    
-        function setMode(modeName) {
-            if (!database[modeName]) return;
-            currentMode = modeName;
-            currentList = [...database[modeName]];
-            sessionHistory = [];
-            
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            const btn = document.querySelector(`button[onclick="setMode('${modeName}')"]`);
-            if(btn) btn.classList.add('active');
-            
-            document.getElementById('game-container').style.display = 'block';
-            document.getElementById('history-section').style.display = 'none';
-            document.getElementById('history-list').innerHTML = '';
-    
-            nextProblem(false);
-        }
-    
+        
+        document.getElementById('game-container').style.display = 'block';
+        document.getElementById('history-section').style.display = 'none';
+        document.getElementById('history-list').innerHTML = '';
+
+        nextProblem(false);
+    }
+        
         function loadProblem(autoPlay = true) {
             if (sessionHistory.length >= PROBLEMS_PER_SESSION || currentList.length === 0) {
                 finishSession();
