@@ -1,0 +1,68 @@
+{
+    "eiken2": [
+      { 
+        "word": "environment", "lang": "en", "tld": "us", "accentName": "American 🇺🇸",
+        "synonyms": ["nature", "ecosystem"], "antonyms": ["pollution"]
+      },
+      { 
+        "word": "achieve", "lang": "en", "tld": "co.uk", "accentName": "British 🇬🇧",
+        "synonyms": ["accomplish", "attain"], "antonyms": ["fail", "give up"]
+      },
+      { 
+        "word": "improve", "lang": "en", "tld": "com.au", "accentName": "Australian 🇦🇺",
+        "synonyms": ["enhance", "upgrade"], "antonyms": ["worsen", "deteriorate"]
+      },
+      { 
+        "word": "decide", "lang": "en", "tld": "co.in", "accentName": "Indian 🇮🇳",
+        "synonyms": ["determine", "choose"], "antonyms": ["hesitate", "waver"]
+      },
+      { 
+        "word": "variety", "lang": "en", "tld": "us", "accentName": "American 🇺🇸",
+        "synonyms": ["diversity", "assortment"], "antonyms": ["uniformity"]
+      }
+    ],
+    "hard": [
+      { 
+        "word": "conscientious", "lang": "en", "tld": "co.uk", "accentName": "British 🇬🇧",
+        "synonyms": ["diligent", "meticulous"], "antonyms": ["careless", "negligent"]
+      },
+      { 
+        "word": "entrepreneur", "lang": "fr", "tld": "fr", "accentName": "French Style 🇫🇷",
+        "synonyms": ["businessperson", "founder"], "antonyms": ["employee"]
+      },
+      { 
+        "word": "hierarchy", "lang": "en", "tld": "us", "accentName": "American 🇺🇸",
+        "synonyms": ["ranking", "pecking order"], "antonyms": ["equality"]
+      },
+      { 
+        "word": "miscellaneous", "lang": "en", "tld": "co.in", "accentName": "Indian 🇮🇳",
+        "synonyms": ["various", "sundry"], "antonyms": ["specific", "single"]
+      },
+      { 
+        "word": "bureaucracy", "lang": "de", "tld": "de", "accentName": "German Style 🇩🇪",
+        "synonyms": ["red tape", "administration"], "antonyms": ["flexibility"]
+      }
+    ],
+    "world": [
+      { 
+        "word": "schedule", "lang": "en", "tld": "co.in", "accentName": "Indian 🇮🇳",
+        "synonyms": ["timetable", "agenda"], "antonyms": ["disorder"]
+      },
+      { 
+        "word": "water", "lang": "en", "tld": "com.au", "accentName": "Australian 🇦🇺",
+        "synonyms": ["H2O", "liquid"], "antonyms": ["dryness"]
+      },
+      { 
+        "word": "chocolate", "lang": "fr", "tld": "fr", "accentName": "French Style 🇫🇷",
+        "synonyms": ["cocoa", "candy"], "antonyms": []
+      },
+      { 
+        "word": "vitamin", "lang": "en", "tld": "co.uk", "accentName": "British 🇬🇧",
+        "synonyms": ["supplement", "nutrient"], "antonyms": ["toxin"]
+      },
+      { 
+        "word": "laboratory", "lang": "en", "tld": "us", "accentName": "American 🇺🇸",
+        "synonyms": ["lab", "research center"], "antonyms": []
+      }
+    ]
+  }
