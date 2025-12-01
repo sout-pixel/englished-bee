@@ -79,6 +79,21 @@
         .word-details { display: none; margin-top: 10px; font-size: 0.9rem; color: #555; padding-left: 10px; border-left: 3px solid var(--border); }
         .detail-row { margin-bottom: 5px; }
         .detail-label { font-weight: bold; margin-right: 5px; }
+        /* --- シェアボタン等のデザイン --- */
+        .action-buttons {
+            display: flex; gap: 10px; justify-content: center; margin-top: 30px;
+        }
+        .action-btn {
+            border: none; padding: 12px 24px; border-radius: 50px;
+            font-size: 1rem; cursor: pointer; font-weight: bold; transition: transform 0.1s;
+        }
+        .action-btn:active { transform: translateY(2px); }
+        
+        /* シェアボタン（目立つ色） */
+        .share-btn { background-color: var(--text); color: var(--bg); }
+        
+        /* リスタートボタン（控えめ） */
+        .restart-btn { background-color: transparent; border: 2px solid var(--border); color: #777; }
     </style>
 </head>
 <body></body>
@@ -96,13 +111,16 @@
         <div id="feedback" class="feedback"></div>
         
         </div>
-
-    <div class="container" id="history-section">
-        <h2 class="history-title">Today's Session History</h2>
-        <ul class="history-list" id="history-list">
-            </ul>
-        <button onclick="location.reload()" style="margin-top:30px; background:none; border:1px solid #ddd; padding:10px 20px; cursor:pointer;">Restart Session</button>
-    </div>
+        <div class="container" id="history-section">
+            <h2 class="history-title">Session Result</h2>
+            
+            <ul class="history-list" id="history-list"></ul>
+            
+            <div class="action-buttons">
+                <button class="action-btn share-btn" id="share-btn" onclick="shareResults()">Share Results 📋</button>
+                <button class="action-btn restart-btn" onclick="location.reload()">Try Again  ↻</button>
+            </div>
+        </div>
     <script>
         let database = {};
         let currentMode = "world";
@@ -112,13 +130,19 @@
         const PROBLEMS_PER_SESSION = 5;
     
         // 定義されているアクセント（表示名とファイルコード）
-        const ACCENTS = [
-            { code: "us", name: "American Accent 🇺🇸" },
-            { code: "uk", name: "British Accent 🇬🇧" },
-            { code: "au", name: "Australian Accent 🇦🇺" },
-            { code: "in", name: "Indian Accent 🇮🇳" }
-        ];
-    
+// 定義されているアクセント（10種類）
+const ACCENTS = [
+        { code: "us", name: "American 🇺🇸" },
+        { code: "uk", name: "British 🇬🇧" },
+        { code: "au", name: "Australian 🇦🇺" },
+        { code: "in", name: "Indian 🇮🇳" },
+        { code: "ie", name: "Irish (Celtic) 🇮🇪" },
+        { code: "za", name: "South African 🇿🇦" },
+        { code: "ng", name: "Nigerian 🇳🇬" },
+        { code: "es", name: "Spanish Style 🇪🇸" },
+        { code: "cn", name: "Chinese Style 🇨🇳" },
+        { code: "jp", name: "Japanese Style 🇯🇵" }
+    ];    
         async function loadDatabase() {
         try {
             const response = await fetch('words.json');
@@ -194,7 +218,7 @@
 
         nextProblem(false);
     }
-        
+
         function loadProblem(autoPlay = true) {
             if (sessionHistory.length >= PROBLEMS_PER_SESSION || currentList.length === 0) {
                 finishSession();
@@ -300,7 +324,54 @@
                 historyList.appendChild(li);
             });
         }
-    
+    // 結果をクリップボードにコピーする機能
+    function shareResults() {
+        // 全国の国旗を追加
+        const flags = { 
+            "us": "🇺🇸", "uk": "🇬🇧", "au": "🇦🇺", "in": "🇮🇳",
+            "ie": "🇮🇪", "za": "🇿🇦", "ng": "🇳🇬",
+            "es": "🇪🇸", "cn": "🇨🇳", "jp": "🇯🇵"
+        };        
+        // 正解数
+        const correctCount = sessionHistory.filter(h => h.isCorrect).length;
+        const total = sessionHistory.length;
+        
+        // タイトルとスコア
+        let text = `Englishes Bee 🐝\nMode: ${currentMode.replace('level_', 'Lv.')}\nScore: ${correctCount}/${total}\n\n`;
+
+        // 1問ごとの結果を絵文字で表現
+        sessionHistory.forEach((h, i) => {
+            const flag = flags[h.wordData.selectedAccent.code] || "🏳️";
+            const mark = h.isCorrect ? "✅" : "❌";
+            
+            // 間違えた単語はネタバレしすぎないように伏せ字にするか、そのまま出すか選べます
+            // ここでは「間違えた単語だけ表示」する形式にします
+            const wordInfo = h.isCorrect ? "" : ` (${h.wordData.word})`;
+            
+            text += `${i + 1}. ${flag} ${mark}${wordInfo}\n`;
+        });
+
+        // 最後にURLを追加（あなたのVercelのURLに書き換わります）
+        text += `\n${window.location.href}`;
+
+        // クリップボードに書き込む
+        navigator.clipboard.writeText(text).then(() => {
+            // ボタンの文字を変えて「コピーできたよ」と伝える
+            const btn = document.getElementById('share-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Copied! ✨";
+            btn.style.backgroundColor = "#4CAF50"; // 緑色にする
+            
+            // 2秒後に元に戻す
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.backgroundColor = "";
+            }, 2000);
+        }).catch(err => {
+            console.error('Copy failed', err);
+            alert("コピーに失敗しました。");
+        });
+    }
         window.onload = loadDatabase;
     
     </script>
