@@ -1,16 +1,38 @@
 {
+    "world": [
+      { "word": "schedule", "synonyms": ["timetable"], "antonyms": [] },
+      { "word": "water", "synonyms": ["liquid"], "antonyms": ["ice"] },
+      { "word": "chocolate", "synonyms": ["cocoa"], "antonyms": [] },
+      { "word": "vitamin", "synonyms": ["supplement"], "antonyms": [] },
+      { "word": "laboratory", "synonyms": ["lab"], "antonyms": [] },
+      { "word": "aluminum", "synonyms": ["metal"], "antonyms": [] },
+      { "word": "advertisement", "synonyms": ["ad"], "antonyms": [] },
+      { "word": "mobile", "synonyms": ["cellphone"], "antonyms": [] },
+      { "word": "garage", "synonyms": ["carport"], "antonyms": [] },
+      { "word": "zebra", "synonyms": ["animal"], "antonyms": [] }
+    ],
     "eiken2": [
       { "word": "environment", "synonyms": ["nature", "ecosystem"], "antonyms": ["pollution"] },
       { "word": "achieve", "synonyms": ["accomplish", "attain"], "antonyms": ["fail"] },
       { "word": "opportunity", "synonyms": ["chance", "opening"], "antonyms": ["misfortune"] },
       { "word": "recognize", "synonyms": ["identify"], "antonyms": ["ignore"] },
-      { "word": "schedule", "synonyms": ["timetable", "agenda"], "antonyms": [] }
+      { "word": "encourage", "synonyms": ["support", "inspire"], "antonyms": ["discourage"] },
+      { "word": "traditional", "synonyms": ["conventional"], "antonyms": ["modern"] },
+      { "word": "audience", "synonyms": ["spectators"], "antonyms": ["performer"] },
+      { "word": "chemical", "synonyms": ["compound"], "antonyms": ["natural"] },
+      { "word": "frequently", "synonyms": ["often"], "antonyms": ["rarely"] },
+      { "word": "graduate", "synonyms": ["finish"], "antonyms": ["dropout"] }
     ],
     "hard": [
       { "word": "conscientious", "synonyms": ["diligent"], "antonyms": ["careless"] },
       { "word": "entrepreneur", "synonyms": ["founder"], "antonyms": ["employee"] },
       { "word": "hierarchy", "synonyms": ["ranking"], "antonyms": ["equality"] },
       { "word": "colonel", "synonyms": ["officer"], "antonyms": [] },
-      { "word": "lieutenant", "synonyms": ["deputy"], "antonyms": [] }
+      { "word": "lieutenant", "synonyms": ["deputy"], "antonyms": [] },
+      { "word": "bureaucracy", "synonyms": ["red tape"], "antonyms": ["flexibility"] },
+      { "word": "miscellaneous", "synonyms": ["various"], "antonyms": ["specific"] },
+      { "word": "psychology", "synonyms": ["mind science"], "antonyms": [] },
+      { "word": "maneuver", "synonyms": ["tactic"], "antonyms": [] },
+      { "word": "rhythm", "synonyms": ["beat"], "antonyms": [] }
     ]
   }
