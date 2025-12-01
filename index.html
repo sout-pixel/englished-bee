@@ -108,67 +108,87 @@
         let database = {};
         let currentMode = "world";
         let currentList = [];
-        let currentProblem = null; // 現在の問題データ
-        let sessionHistory = [];   // 今回の学習履歴を貯める場所
-        const PROBLEMS_PER_SESSION = 5; // 1回のセッションの問題数（テスト用に5問に設定）
+        let currentProblem = null;
+        let sessionHistory = [];
+        const PROBLEMS_PER_SESSION = 5;
+    
+        // 定義されているアクセント（表示名とファイルコード）
+        const ACCENTS = [
+            { code: "us", name: "American Accent 🇺🇸" },
+            { code: "uk", name: "British Accent 🇬🇧" },
+            { code: "au", name: "Australian Accent 🇦🇺" },
+            { code: "in", name: "Indian Accent 🇮🇳" }
+        ];
     
         async function loadDatabase() {
             try {
                 const response = await fetch('words.json');
                 database = await response.json();
                 document.getElementById('accent-display').innerText = "Select Mode";
-                setMode('world');
+                // ページ読み込み時にボタンの初期状態を作るため、とりあえず最初のモードをロード（再生はしない）
+                if(database["eiken2"]) setMode('eiken2'); 
             } catch (error) {
                 console.error("Error:", error);
             }
         }
     
         function setMode(modeName) {
-        if (!database[modeName]) return;
-        currentMode = modeName;
-        currentList = [...database[modeName]]; 
-        sessionHistory = [];
-        
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        const btn = document.querySelector(`button[onclick="setMode('${modeName}')"]`);
-        if(btn) btn.classList.add('active');
-        
-        document.getElementById('game-container').style.display = 'block';
-        document.getElementById('history-section').style.display = 'none';
-        document.getElementById('history-list').innerHTML = '';
-
-        // 【変更点】最初は自動再生しない (falseを渡す)
-        nextProblem(false);
-    }
+            if (!database[modeName]) return;
+            currentMode = modeName;
+            currentList = [...database[modeName]];
+            sessionHistory = [];
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            const btn = document.querySelector(`button[onclick="setMode('${modeName}')"]`);
+            if(btn) btn.classList.add('active');
+            
+            document.getElementById('game-container').style.display = 'block';
+            document.getElementById('history-section').style.display = 'none';
+            document.getElementById('history-list').innerHTML = '';
     
-  // 【変更点】autoPlay引数を受け取る（デフォルトはtrue）
-  function loadProblem(autoPlay = true) {
-        if (sessionHistory.length >= PROBLEMS_PER_SESSION || currentList.length === 0) {
-            finishSession();
-            return;
+            nextProblem(false);
         }
-
-        const randomIndex = Math.floor(Math.random() * currentList.length);
-        currentProblem = currentList.splice(randomIndex, 1)[0];
-        
-        document.getElementById('accent-display').innerText = currentProblem.accentName;
-        document.getElementById('user-input').value = '';
-        document.getElementById('feedback').innerText = '';
-        document.getElementById('user-input').focus();
-        
-        // 【変更点】autoPlayがtrueの時だけ再生する
-        if (autoPlay) {
-            setTimeout(speakWord, 300);
-        } else {
-            // 再生しない場合は、「押して聞いてね」というメッセージを出すと親切
-            document.getElementById('feedback').innerText = "Press 🔊 to start";
+    
+        function loadProblem(autoPlay = true) {
+            if (sessionHistory.length >= PROBLEMS_PER_SESSION || currentList.length === 0) {
+                finishSession();
+                return;
+            }
+    
+            const randomIndex = Math.floor(Math.random() * currentList.length);
+            // リストから抜き出す（splice）前に、オブジェクトをコピーしておく
+            const rawData = currentList.splice(randomIndex, 1)[0];
+            
+            // ★ここが新機能：ランダムにアクセントを決定して、問題データにくっつける
+            const randomAccent = ACCENTS[Math.floor(Math.random() * ACCENTS.length)];
+            
+            currentProblem = {
+                ...rawData,                 // 単語データ
+                selectedAccent: randomAccent // 今回選ばれたアクセント
+            };
+            
+            // 画面表示
+            document.getElementById('accent-display').innerText = currentProblem.selectedAccent.name;
+            document.getElementById('user-input').value = '';
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('user-input').focus();
+            
+            if (autoPlay) {
+                setTimeout(speakWord, 300);
+            } else {
+                document.getElementById('feedback').innerText = "Press 🔊 to start";
+            }
         }
-    }  
+    
         function speakWord() {
             if (!currentProblem) return;
-            const audioPath = `audio/${currentProblem.word}.mp3`;
+            
+            // ★ファイル名の指定方法が変わります: 単語_国コード.mp3
+            const audioPath = `audio/${currentProblem.word}_${currentProblem.selectedAccent.code}.mp3`;
+            
             const audio = new Audio(audioPath);
             audio.play().catch(() => {
+                console.log("File missing, fallback to robot.");
                 const u = new SpeechSynthesisUtterance(currentProblem.word);
                 u.lang = "en-US";
                 window.speechSynthesis.speak(u);
@@ -185,30 +205,25 @@
     
             const isCorrect = (userSpelling === correctSpelling);
             
-            // 1. フィードバック表示（シンプルに）
             if (isCorrect) {
-                feedbackDiv.innerHTML = "✓"; // 正解ならチェックマークだけ
+                feedbackDiv.innerHTML = "✓";
             } else {
-                // 間違いなら、赤字で答えだけを出す
                 feedbackDiv.innerHTML = `<span class='correct-answer'>${correctSpelling}</span>`;
             }
     
-            // 2. 履歴に保存
             sessionHistory.push({
                 wordData: currentProblem,
                 userAnswer: userSpelling,
                 isCorrect: isCorrect
             });
     
-            // 3. 淡々と次へ（2秒後）
-            setTimeout(nextProblem, 2000);
+            setTimeout(() => nextProblem(true), 2000);
         }
     
-// 【変更点】引数をそのまま loadProblem に渡す
-function nextProblem(autoPlay = true) {
-        loadProblem(autoPlay);
-    }    
-        // セッション終了時の処理（履歴画面の表示）
+        function nextProblem(autoPlay = true) {
+            loadProblem(autoPlay);
+        }
+    
         function finishSession() {
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('history-section').style.display = 'block';
@@ -220,26 +235,22 @@ function nextProblem(autoPlay = true) {
                 
                 const statusClass = item.isCorrect ? 'status-correct' : 'status-wrong';
                 const statusText = item.isCorrect ? '✓ Correct' : `✗ Wrong (typed: ${item.userAnswer})`;
+                const synonyms = item.wordData.synonyms ? item.wordData.synonyms.join(", ") : "-";
+                const antonyms = item.wordData.antonyms ? item.wordData.antonyms.join(", ") : "-";
     
-                // ※同義語・反義語データはまだJSONにないので仮のものを表示
-                const synonyms = item.wordData.synonyms ? item.wordData.synonyms.join(", ") : "(データなし)";
-                const antonyms = item.wordData.antonyms ? item.wordData.antonyms.join(", ") : "(データなし)";
-    
+                // 履歴にも「どのアクセントで出題されたか」を表示
                 li.innerHTML = `
                     <div class="history-word">${item.wordData.word}</div>
-                    <div class="history-status ${statusClass}">${statusText} - ${item.wordData.accentName}</div>
+                    <div class="history-status ${statusClass}">${statusText} - ${item.wordData.selectedAccent.name}</div>
                     <div class="word-details" id="details-${index}">
-                        <div class="detail-row"><span class="detail-label">Synonyms(同義語):</span> ${synonyms}</div>
-                        <div class="detail-row"><span class="detail-label">Antonyms(反義語):</span> ${antonyms}</div>
+                        <div class="detail-row"><span class="detail-label">Synonyms:</span> ${synonyms}</div>
+                        <div class="detail-row"><span class="detail-label">Antonyms:</span> ${antonyms}</div>
                     </div>
                 `;
-                
-                // クリックで詳細を開閉する機能
                 li.onclick = () => {
                     const details = document.getElementById(`details-${index}`);
                     details.style.display = details.style.display === 'block' ? 'none' : 'block';
                 };
-                
                 historyList.appendChild(li);
             });
         }
